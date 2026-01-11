@@ -38,6 +38,7 @@ if [ -f /usr/bin/qemu-aarch64-static ]; then
 fi
 
 # Copy DNS for internet access
+rm -f "$ROOTFS_DIR/etc/resolv.conf"
 cp /etc/resolv.conf "$ROOTFS_DIR/etc/resolv.conf"
 
 # 5. Branding & Configuration Script

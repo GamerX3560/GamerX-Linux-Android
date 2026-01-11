@@ -42,9 +42,18 @@ echo "[*] Extracting Base System (this may take a while)..."
 bsdtar -xpf "$WORK_DIR/base.tar.gz" -C "$ROOTFS_DIR"
 
 # 4. Chroot Preparation (QEMU for ARM emulation if on x86)
-if [ -f /usr/bin/qemu-aarch64-static ]; then
-    echo "[*] Setting up QEMU emulation..."
-    cp /usr/bin/qemu-aarch64-static "$ROOTFS_DIR/usr/bin/"
+HOST_ARCH=$(uname -m)
+if [ "$HOST_ARCH" = "x86_64" ]; then
+    if [ -f /usr/bin/qemu-aarch64-static ]; then
+        echo "[*] x86_64 detected. Setting up QEMU emulation..."
+        cp /usr/bin/qemu-aarch64-static "$ROOTFS_DIR/usr/bin/"
+    else
+        echo "[-] Error: You are on x86_64 but 'qemu-aarch64-static' is missing!"
+        echo "    This is required to run ARM64 code on your PC."
+        echo "    -> Arch Linux: sudo pacman -S qemu-user-static"
+        echo "    -> Debian/Ubuntu: sudo apt install qemu-user-static"
+        exit 1
+    fi
 fi
 
 # Copy DNS for internet access

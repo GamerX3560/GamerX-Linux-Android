@@ -97,6 +97,9 @@ function cleanup_mounts {
 }
 trap cleanup_mounts EXIT INT TERM
 
+# Fix mtab for pacman disk space check
+ln -sf /proc/self/mounts "$ROOTFS_DIR/etc/mtab"
+
 echo "[*] Entering Chroot to configure system..."
 chroot "$ROOTFS_DIR" /bin/bash /setup.sh
 

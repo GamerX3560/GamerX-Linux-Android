@@ -80,9 +80,29 @@ fi
 cp setup.sh "$ROOTFS_DIR/setup.sh"
 chmod +x "$ROOTFS_DIR/setup.sh"
 
-# 6. Enter Chroot and Run Setup
+# 6. Mount & Enter Chroot
+echo "[*] Mounting filesystems..."
+mount -t proc /proc "$ROOTFS_DIR/proc"
+mount -t sysfs /sys "$ROOTFS_DIR/sys"
+mount --bind /dev "$ROOTFS_DIR/dev"
+mount --bind /dev/pts "$ROOTFS_DIR/dev/pts"
+
+# Function to unmount on exit
+function cleanup_mounts {
+    echo "[*] Unmounting..."
+    umount "$ROOTFS_DIR/dev/pts" 2>/dev/null || true
+    umount "$ROOTFS_DIR/dev" 2>/dev/null || true
+    umount "$ROOTFS_DIR/sys" 2>/dev/null || true
+    umount "$ROOTFS_DIR/proc" 2>/dev/null || true
+}
+trap cleanup_mounts EXIT INT TERM
+
 echo "[*] Entering Chroot to configure system..."
 chroot "$ROOTFS_DIR" /bin/bash /setup.sh
+
+# Cleanup trap will run automatically, but we can call it explicitly too to be clean before tar
+cleanup_mounts
+trap - EXIT INT TERM # Disable trap to avoid double unmount
 
 # 7. Cleanup Setup Script
 rm "$ROOTFS_DIR/setup.sh"

@@ -53,6 +53,9 @@ Instead of a single script, this repo contains the actual configuration files:
 *   Linux PC (Arch Linux recommended or Distro with `pacstrap`) or WSL.
 *   `sudo` privileges.
 *   `arch-install-scripts` package.
+*   **For x86_64 Users**: `qemu-user-static` and `qemu-user-static-binfmt` (Arch) packages to properly emulate ARM64.
+    *   *Arch*: `sudo pacman -S qemu-user-static qemu-user-static-binfmt`
+    *   *Debian/Ubuntu*: `sudo apt install qemu-user-static` (ensure binfmt-support is active).
 
 **Steps**:
 ```bash

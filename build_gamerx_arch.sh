@@ -44,14 +44,22 @@ bsdtar -xpf "$WORK_DIR/base.tar.gz" -C "$ROOTFS_DIR"
 # 4. Chroot Preparation (QEMU for ARM emulation if on x86)
 HOST_ARCH=$(uname -m)
 if [ "$HOST_ARCH" = "x86_64" ]; then
+    # 1. Check for Static Binary
     if [ -f /usr/bin/qemu-aarch64-static ]; then
         echo "[*] x86_64 detected. Setting up QEMU emulation..."
         cp /usr/bin/qemu-aarch64-static "$ROOTFS_DIR/usr/bin/"
     else
-        echo "[-] Error: You are on x86_64 but 'qemu-aarch64-static' is missing!"
-        echo "    This is required to run ARM64 code on your PC."
-        echo "    -> Arch Linux: sudo pacman -S qemu-user-static"
-        echo "    -> Debian/Ubuntu: sudo apt install qemu-user-static"
+        echo "[-] Error: 'qemu-aarch64-static' is missing!"
+        echo "    Install 'qemu-user-static' package."
+        exit 1
+    fi
+
+    # 2. Check for Binfmt Registration (Kernel support)
+    if [ ! -f /proc/sys/fs/binfmt_misc/qemu-aarch64 ]; then
+        echo "[-] Error: ARM64 binary format not registered in kernel!"
+        echo "    This causes 'Exec format error'."
+        echo "    Fix (Arch): sudo pacman -S qemu-user-static-binfmt && sudo systemctl restart systemd-binfmt"
+        echo "    Fix (Debian): sudo apt install binfmt-support"
         exit 1
     fi
 fi

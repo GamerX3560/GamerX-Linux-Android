@@ -25,7 +25,7 @@ mkdir -p "$ROOTFS_DIR"
 
 # 2. Download Base Arch Linux ARM
 echo "[*] Downloading Arch Linux ARM Base..."
-wget http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz -O "$WORK_DIR/base.tar.gz"
+wget http://ca.us.mirror.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz -O "$WORK_DIR/base.tar.gz"
 
 # 3. Extract Base
 echo "[*] Extracting Base System (this may take a while)..."

@@ -49,75 +49,27 @@ pacman-key --init
 pacman-key --populate archlinuxarm
 pacman -Sy --noconfirm
 
-# Install Essential Packages
-echo "[*] Installing Packages..."
-pacman -S --noconfirm base-devel git wget curl nano sudo \
-    net-tools dnsutils iproute2 \
-    xfce4 xfce4-terminal tigervnc xorg-xauth xorg-xhost \
-    python python-numpy ttf-dejavu \
-    xorg-server-xvfb xorg-xinit
+# 5. Apply Overlay & Setup
+echo "[*] Applying GamerX Overlay (Configs, Scripts)..."
+if [ -d "overlay" ]; then
+    cp -rf overlay/* "$ROOTFS_DIR/"
+else
+    echo "[-] Warning: 'overlay' directory not found!"
+fi
 
-# Install noVNC (Web Client)
-echo "[*] Setting up noVNC..."
-git clone https://github.com/novnc/noVNC.git /usr/share/novnc
-git clone https://github.com/novnc/websockify /usr/share/novnc/utils/websockify
-ln -s /usr/share/novnc/utils/novnc_proxy /usr/bin/novnc_server
-
-# Install Cloudflared (Tunnel)
-echo "[*] Installing Cloudflared..."
-# Detect Arch (AArch64)
-wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64 -O /usr/bin/cloudflared
-chmod +x /usr/bin/cloudflared
-
-# Configure Branding
-echo "[*] Applying GamerX Branding..."
-
-# Hostname
-echo "GamerX-Linux" > /etc/hostname
-
-# MOTD
-cat <<MOTD > /etc/motd
-=============================================
-      G A M E R X   L I N U X
-      Arch Linux / XFCE4 / Magisk
-=============================================
-Welcome to the GamerX Environment.
-MOTD
-
-# Add 'gamerx' user
-useradd -m -G wheel,users,video,storage,network -s /bin/bash gamerx
-echo "gamerx:gamerx" | chpasswd
-echo "root:toor" | chpasswd
-
-# Sudo rights
-echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
-
-# VNC Setup for GamerX User
-mkdir -p /home/gamerx/.vnc
-echo "#!/bin/bash
-xrdb \$HOME/.Xresources
-startxfce4 &
-" > /home/gamerx/.vnc/xstartup
-chmod +x /home/gamerx/.vnc/xstartup
-chown -R gamerx:gamerx /home/gamerx/.vnc
-
-# Branding inside XFCE (Mockup - would require config file injection)
-# We can pre-populate .config/xfce4 here if we had the assets.
-mkdir -p /home/gamerx/.config/xfce4
-chown -R gamerx:gamerx /home/gamerx/.config
-
-# Cleanup
-rm /usr/bin/qemu-aarch64-static
-rm /gamerx_setup.sh
-pcman -Sc --noconfirm
-echo "[*] Setup Complete!"
-EOF
-
-chmod +x "$ROOTFS_DIR/gamerx_setup.sh"
+# Copy Setup Script
+cp setup.sh "$ROOTFS_DIR/setup.sh"
+chmod +x "$ROOTFS_DIR/setup.sh"
 
 # 6. Enter Chroot and Run Setup
 echo "[*] Entering Chroot to configure system..."
-chroot "$ROOTFS_DIR" /bin/bash /gamerx_setup.sh
+chroot "$ROOTFS_DIR" /bin/bash /setup.sh
+
+# 7. Cleanup Setup Script
+rm "$ROOTFS_DIR/setup.sh"
+
+# 8. Compress
+echo "[*] Compressing Final Image..."
 
 # 7. Compress
 echo "[*] Compressing Final Image..."

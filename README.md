@@ -36,9 +36,18 @@
 
 ---
 
-## 🏗 Build It Yourself
+## 📂 Source Structure
 
-Want to compile the image from scratch? We provide the build script.
+Instead of a single script, this repo contains the actual configuration files:
+
+*   **`build_gamerx_arch.sh`**: The main driver. Downloads base image and orchestrates the build.
+*   **`setup.sh`**: The configuration script that runs *inside* the Chroot (installs packages, sets users).
+*   **`overlay/`**: Files copied directly to the rootfs.
+    *   `etc/motd`: Login banner.
+    *   `home/gamerx/.vnc/xstartup`: VNC startup command.
+    *   `home/gamerx/.bashrc`: Shell configuration.
+
+## 🏗 Build It Yourself
 
 **Requirements**:
 *   Linux PC (Arch Linux recommended or Distro with `pacstrap`) or WSL.
@@ -51,13 +60,16 @@ Want to compile the image from scratch? We provide the build script.
 git clone https://github.com/GamerX3560/GamerX-Linux-Android.git
 cd GamerX-Linux-Android
 
-# 2. Make Executable
+# 2. (Optional) Customize
+# Edit overlay/etc/motd or setup.sh to change packages/branding.
+
+# 3. Make Executable
 chmod +x build_gamerx_arch.sh
 
-# 3. Build (Root required for Chroot/Filesystem creation)
+# 4. Build (Root required for Chroot/Filesystem creation)
 sudo ./build_gamerx_arch.sh
 ```
-*Output: `GamerX_Linux_ARM64.tar.gz`*
+*Output: `GamerX_Linux_ARM64.tar.gz`* (Upload this to Release)
 
 ---
 

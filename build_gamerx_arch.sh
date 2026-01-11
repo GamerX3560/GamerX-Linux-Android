@@ -20,12 +20,22 @@ fi
 
 # 1. Prepare Workspace
 echo "[*] Preparing workspace..."
-rm -rf "$WORK_DIR"
+if [ -d "$ROOTFS_DIR" ]; then
+    rm -rf "$ROOTFS_DIR"
+fi
 mkdir -p "$ROOTFS_DIR"
 
-# 2. Download Base Arch Linux ARM
-echo "[*] Downloading Arch Linux ARM Base..."
-wget http://ca.us.mirror.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz -O "$WORK_DIR/base.tar.gz"
+if [ ! -d "$WORK_DIR" ]; then
+    mkdir -p "$WORK_DIR"
+fi
+
+# 2. Download Base Arch Linux ARM (with Cache)
+if [ -f "$WORK_DIR/base.tar.gz" ]; then
+    echo "[*] Base image found in cache. Skipping download."
+else
+    echo "[*] Downloading Arch Linux ARM Base..."
+    wget http://ca.us.mirror.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz -O "$WORK_DIR/base.tar.gz"
+fi
 
 # 3. Extract Base
 echo "[*] Extracting Base System (this may take a while)..."
@@ -40,15 +50,6 @@ fi
 # Copy DNS for internet access
 rm -f "$ROOTFS_DIR/etc/resolv.conf"
 cp /etc/resolv.conf "$ROOTFS_DIR/etc/resolv.conf"
-
-# 5. Branding & Configuration Script
-cat <<EOF > "$ROOTFS_DIR/gamerx_setup.sh"
-#!/bin/bash
-
-# Initialize Pacman
-pacman-key --init
-pacman-key --populate archlinuxarm
-pacman -Sy --noconfirm
 
 # 5. Apply Overlay & Setup
 echo "[*] Applying GamerX Overlay (Configs, Scripts)..."
@@ -71,12 +72,9 @@ rm "$ROOTFS_DIR/setup.sh"
 
 # 8. Compress
 echo "[*] Compressing Final Image..."
-
-# 7. Compress
-echo "[*] Compressing Final Image..."
 cd "$ROOTFS_DIR"
-tar -czpf "../$IMAGE_NAME" .
+tar -czpf "../../$IMAGE_NAME" .
 
 echo "========================================"
-echo "    Build Complete: $WORK_DIR/$IMAGE_NAME"
+echo "    Build Complete: $IMAGE_NAME"
 echo "========================================"
